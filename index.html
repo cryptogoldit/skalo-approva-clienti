@@ -1,0 +1,56 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Approvazione strategia · Skalo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--coral:#E8503A;--cream:#F5F0EB;--ink:#0A0A0A;--mut:#8a8a85;--border:#e6ddd2}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:#fff;border:1px solid var(--border);border-radius:22px;max-width:560px;width:100%;padding:40px;box-shadow:0 16px 60px rgba(0,0,0,.06)}
+.logo{font-weight:900;font-size:24px;letter-spacing:-.03em}.logo .d{color:var(--coral)}
+.kick{margin-top:18px;color:var(--coral);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+h1{font-size:28px;font-weight:800;line-height:1.15;letter-spacing:-.02em;margin-top:8px}
+p.lead{color:#555;font-size:15px;line-height:1.6;margin-top:14px}
+.btns{display:flex;flex-direction:column;gap:12px;margin-top:28px}
+button{font-family:inherit;font-weight:600;font-size:16px;border-radius:50px;padding:16px 24px;cursor:pointer;border:2px solid transparent;transition:.15s}
+.primary{background:var(--coral);color:#fff}.primary:hover{background:#d14030}
+.ghost{background:#fff;color:var(--ink);border-color:rgba(0,0,0,.18)}.ghost:hover{border-color:var(--coral);color:var(--coral)}
+textarea{width:100%;margin-top:16px;border:1px solid var(--border);border-radius:14px;padding:14px;font-family:inherit;font-size:15px;min-height:120px;resize:vertical}
+textarea:focus{outline:none;border-color:var(--coral)}
+.hide{display:none}
+.foot{margin-top:26px;color:var(--mut);font-size:12px;border-top:1px solid var(--border);padding-top:16px}
+.ok{text-align:center;padding:10px 0}.ok .big{font-size:40px}.ok h1{margin-top:10px}
+</style></head>
+<body><div class="card">
+<div class="logo">Skalo<span class="d">.</span></div>
+<div id="content">
+  <div class="kick" id="kick">Strategia</div>
+  <h1>La tua strategia è pronta. Che ne pensi?</h1>
+  <p class="lead">Hai ricevuto il PDF, la presentazione e lo schema. Se ti torna, approva e partiamo subito con la produzione dei contenuti. Se c'è qualcosa da sistemare, segnalacelo: lo limiamo prima di pubblicare.</p>
+  <div class="btns">
+    <button class="primary" onclick="approva()">Approva la strategia</button>
+    <button class="ghost" onclick="apriNote()">Segnala una modifica</button>
+  </div>
+  <div id="notebox" class="hide">
+    <textarea id="note" placeholder="Cosa miglioreresti? Scrivilo qui..."></textarea>
+    <div class="btns"><button class="primary" onclick="inviaNote()">Invia le note</button></div>
+  </div>
+  <div class="foot">Skalo · skalo.agency · info@skalo.agency</div>
+</div>
+</div>
+<script>
+var qs=new URLSearchParams(location.search);
+var CLIENTE=qs.get('c')||'la tua attività', PERIODO=qs.get('p')||'';
+document.getElementById('kick').textContent='Strategia '+CLIENTE+(PERIODO?' · '+PERIODO:'');
+var EP='https://zguqvpssxdjvipxnjjte.supabase.co/functions/v1/approva';
+function post(esito,note){ return fetch(EP,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({cliente:CLIENTE,periodo:PERIODO,esito:esito,note:note||null})}).then(function(r){return r.json()}); }
+function approva(){ post('approvato',null).then(function(j){ if(j&&j.ok){done(true);} else {fail();} }).catch(fail); }
+function apriNote(){ document.getElementById('notebox').classList.remove('hide'); document.getElementById('note').focus(); }
+function inviaNote(){ var t=document.getElementById('note').value.trim(); if(!t){ document.getElementById('note').focus(); return;} post('modifiche',t).then(function(j){ if(j&&j.ok){done(false);} else {fail();} }).catch(fail); }
+function fail(){ alert('Qualcosa è andato storto, riprova tra poco.'); }
+function done(approved){
+  var html=approved
+   ? '<div class="ok"><div class="big">✅</div><h1>Grazie!</h1><p class="lead">Abbiamo registrato la tua approvazione. Skalo parte subito con la produzione dei contenuti.</p></div>'
+   : '<div class="ok"><div class="big">✍️</div><h1>Ricevuto, grazie</h1><p class="lead">Abbiamo preso le tue note. Le sistemiamo e ti ricontattiamo a breve.</p></div>';
+  document.getElementById('content').innerHTML=html+'<div class="foot">Skalo · skalo.agency · info@skalo.agency</div>';
+}
+</script>
+</body></html>
