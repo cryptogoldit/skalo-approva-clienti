@@ -38,14 +38,14 @@ textarea:focus{outline:none;border-color:var(--coral)}
 </div>
 <script>
 var qs=new URLSearchParams(location.search);
-var CLIENTE=qs.get('c')||'la tua attività', PERIODO=qs.get('p')||'';
+var CLIENTE=qs.get('c')||'la tua attività', PERIODO=qs.get('p')||'', TOKEN=qs.get('t')||'';
 document.getElementById('kick').textContent='Strategia '+CLIENTE+(PERIODO?' · '+PERIODO:'');
 var EP='https://zguqvpssxdjvipxnjjte.supabase.co/functions/v1/approva';
-function post(esito,note){ return fetch(EP,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({cliente:CLIENTE,periodo:PERIODO,esito:esito,note:note||null})}).then(function(r){return r.json()}); }
-function approva(){ post('approvato',null).then(function(j){ if(j&&j.ok){done(true);} else {fail();} }).catch(fail); }
+function post(esito,note){ return fetch(EP,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({cliente:CLIENTE,periodo:PERIODO,t:TOKEN||null,esito:esito,note:note||null})}).then(function(r){return r.json()}); }
+function approva(){ post('approvato',null).then(function(j){ if(j&&j.ok){done(true);} else {fail(j);} }).catch(fail); }
 function apriNote(){ document.getElementById('notebox').classList.remove('hide'); document.getElementById('note').focus(); }
-function inviaNote(){ var t=document.getElementById('note').value.trim(); if(!t){ document.getElementById('note').focus(); return;} post('modifiche',t).then(function(j){ if(j&&j.ok){done(false);} else {fail();} }).catch(fail); }
-function fail(){ alert('Qualcosa è andato storto, riprova tra poco.'); }
+function inviaNote(){ var t=document.getElementById('note').value.trim(); if(!t){ document.getElementById('note').focus(); return;} post('modifiche',t).then(function(j){ if(j&&j.ok){done(false);} else {fail(j);} }).catch(fail); }
+function fail(j){ alert((j&&j.messaggio)||'Qualcosa è andato storto, riprova tra poco.'); }
 function done(approved){
   var html=approved
    ? '<div class="ok"><div class="big">✅</div><h1>Grazie!</h1><p class="lead">Abbiamo registrato la tua approvazione. Skalo parte subito con la produzione dei contenuti.</p></div>'
